@@ -7,7 +7,7 @@ import argparse
 from telegram import Update
 from telegram.ext import Application, ContextTypes, MessageHandler, filters
 
-from lib.amqp_client import ClientAMQP
+from lib.amqp_client import ClientAMQP, AMQPClientException
 from lib.config_log import config_logger
 
 
@@ -37,8 +37,11 @@ class Bot:
         update: Update,
         context: ContextTypes
     ):
-        body = json.dumps(update.message.text).encode()
-        await self.amqp_client.send(body)
+        try:
+            body = json.dumps(update.message.text).encode()
+            await self.amqp_client.send(body)
+        except AMQPClientException as e:
+            self.logger.error(f"Ошибка AMQP: {e}")
 
 
 def args_parser():
