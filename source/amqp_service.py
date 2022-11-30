@@ -80,6 +80,7 @@ def args_parser():
     parser.add_argument(
         "--token",
         help="Токен доступа для телеграм бота",
+        default="5677540474:AAEAXcSXYuyPXldGMwzufsSDZ5fQBd9cOLo",
         required=True
     )
 

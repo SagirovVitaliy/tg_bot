@@ -2,6 +2,7 @@ import sys
 import json
 import logging
 import traceback
+import argparse
 
 from telegram import Update
 from telegram.ext import Application, ContextTypes, MessageHandler, filters
@@ -39,6 +40,7 @@ class Bot:
         body = json.dumps(update.message.text).encode()
         await self.amqp_client.send(body)
 
+
 def args_parser():
     parser = argparse.ArgumentParser()
 
@@ -47,33 +49,28 @@ def args_parser():
         help="URL для rabbitmq сервера, формат amqp://login:pass@server:port",
         required=True
     )
+
     parser.add_argument(
-        "--amqp-queue",
+        "--exchange",
         required=True
+    )
+
+    parser.add_argument(
+        "--route-key",
+        default=""
     )
 
     parser.add_argument(
         "--token",
         help="Токен доступа для телеграм бота",
-        required=True
-    )
-
-    parser.add_argument(
-        "--url",
-        required=True
-    )
-
-    parser.add_argument(
-        "--path",
+        default="5677540474:AAEAXcSXYuyPXldGMwzufsSDZ5fQBd9cOLo",
         required=True
     )
 
     return parser
 
-if __name__ == '__main__':
-    b = Bot('5677540474:AAEAXcSXYuyPXldGMwzufsSDZ5fQBd9cOLo')
-    b.start()
 
+if __name__ == '__main__':
     args = args_parser().parse_args()
 
     bot = Bot(args=args)
@@ -82,7 +79,7 @@ if __name__ == '__main__':
         bot.start()
     except KeyboardInterrupt:
         print("Получен сигнал остановки")
-        bot.stop()
+        # Пока не понятно как это останавливать
     except Exception:
         print("Произошла критическая ошибка")
         tb = traceback.format_exc()
