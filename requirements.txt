@@ -1,0 +1,6 @@
+python-telegram-bot==13.14
+aiormq==6.4.2
+aioresponses==0.7.3
+aiohttp==6.0.2
+aio-pika==8.2.5
+python-telegram-bot==20.0a0
