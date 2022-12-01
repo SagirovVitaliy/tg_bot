@@ -6,11 +6,7 @@ services:
     container_name: 'rabbitmq'
 
     ports:
-      - '5672:5672'
       - '15672:15672'
-
-    networks:
-      - tg_rabbit
 
   service:
     build: .
@@ -20,9 +16,6 @@ services:
     depends_on:
       - "rabbitmq"
 
-    networks:
-      - tg_rabbit
-
   bot:
     build: .
 
@@ -30,11 +23,3 @@ services:
 
     depends_on:
       - "rabbitmq"
-
-    networks:
-      - tg_rabbit
-
-networks:
-  tg_rabbit:
-    external:
-      name: tg

@@ -35,8 +35,11 @@ class ServiceAMQP:
         self.connetion = None
 
     async def start(self):
-        await self._connection()
-        await self._start_consuming()
+        try:
+            await self._connection()
+            await self._start_consuming()
+        except AMQPError as e:
+            self.logger.error(f"Ошибка AMQP: {e}")
 
     async def on_message(self, message: aiormq.abc.DeliveredMessage):
         """
