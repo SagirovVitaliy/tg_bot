@@ -24,8 +24,15 @@ class ServiceAMQP:
         self.amqp_url = args.amqp_url
         self.amqp_queue = args.amqp_queue
         self.channel = None
-        self.client = Client(args.url, args.path)
+        self.client = Client(
+            args.url,
+            args.path.replace(
+                "TOKEN",
+                args.token
+            )
+        )
         self.logger = config_logger()
+        self.connetion = None
 
     async def start(self):
         await self._connection()
@@ -38,25 +45,33 @@ class ServiceAMQP:
             message - AMQP пакет
         """
         try:
-            message = self._format_body(message.body)
-            await self.client.send_message(message)
+            body = self._format_body(message.body)
+            await self.client.send_message(body)
+            await self.client.close()
+
+            self.logger.info(f"Отправили сообщение {body}")
+
+            await self.channel.basic_ack(message.delivery.delivery_tag)
 
         except AioClientException as e:
             self.logger.error(f"Ошибка aiohttp клиента: {e}")
+            await self.client.close()
+            await self.channel.basic_ack(message.delivery.delivery_tag)
         except AMQPError as e:
             self.logger.error(f"Ошибка AMQP: {e}")
+            await self.channel.basic_ack(message.delivery.delivery_tag)
 
     async def _connection(self) -> None:
         """Создаёт подключение и канал"""
-        connection = await aiormq.connect(self.amqp_url)
-        self.channel = await connection.channel()
+        self.connection = await aiormq.connect(self.amqp_url)
+        self.channel = await self.connection.channel()
         await self.channel.basic_qos(prefetch_count=1)
 
     async def _start_consuming(self) -> None:
         """Включает прослушивание"""
         await self.channel.basic_consume(self.amqp_queue, self.on_message)
 
-    def _format_body(body: bytes) -> Union[str, dict]:
+    def _format_body(self, body: bytes) -> Union[str, dict]:
         """Форматирует AMQP пакет"""
         try:
             return json.loads(body.decode("utf-8"))
@@ -70,28 +85,27 @@ def args_parser():
     parser.add_argument(
         "--amqp-url",
         help="URL для rabbitmq сервера, формат amqp://login:pass@server:port",
-        required=True
+        default="amqp://guest:guest@localhost/"
     )
     parser.add_argument(
         "--amqp-queue",
-        required=True
+        default="tg_msg"
     )
 
     parser.add_argument(
         "--token",
         help="Токен доступа для телеграм бота",
         default="5677540474:AAEAXcSXYuyPXldGMwzufsSDZ5fQBd9cOLo",
-        required=True
     )
 
     parser.add_argument(
         "--url",
-        required=True
+        default="https://api.telegram.org"
     )
 
     parser.add_argument(
         "--path",
-        required=True
+        default="/botTOKEN/"
     )
 
     return parser

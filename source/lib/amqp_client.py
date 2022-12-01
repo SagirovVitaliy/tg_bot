@@ -19,10 +19,11 @@ class ClientAMQP:
         self.exchange = exchange
         self.route_key = route_key
         self.channel = None
+        self._connection = None
 
     async def _connect(self):
-        connection = await aiormq.connect(self.amqp_url)
-        self._channel = await connection.channel()
+        self._connection = await aiormq.connect(self.amqp_url)
+        self._channel = await self._connection.channel()
 
     async def send(self, body: bytes):
         """
@@ -30,11 +31,11 @@ class ClientAMQP:
         Args:
             body - тело сообщение
         """
-        await self._connect()
-
-        correlation_id = str(uuid.uuid4())
-
         try:
+            await self._connect()
+
+            correlation_id = str(uuid.uuid4())
+
             await self._channel.basic_publish(
                 body=body,
                 exchange=self.exchange,
@@ -45,5 +46,8 @@ class ClientAMQP:
                     correlation_id=correlation_id,
                 )
             )
+
+            await self._connection.close()
+
         except AMQPError as e:
             raise AMQPClientException(f"AMQP Error: {e}")

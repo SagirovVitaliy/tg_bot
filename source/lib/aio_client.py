@@ -28,7 +28,7 @@ class Client:
         self,
         method: str,
         url: str,
-        payload: dict
+        params: dict
     ) -> str:
         """
         Создаёт запрос
@@ -43,7 +43,7 @@ class Client:
             kwargs = {
                 "method": method,
                 "url": url,
-                "json": payload,
+                "params": params,
                 "timeout": self.timeout
             }
             async with self.session.request(**kwargs) as resp:
@@ -57,14 +57,18 @@ class Client:
         except json.decoder.JSONDecodeError as e:
             raise AioClientException(f"Ошибка декодирования json: {e}")
 
-    async def send_message(self, message: str) -> None:
+    def _get_url(self, path: str) -> str:
+        """Создаёт полную ссылку"""
+        return f"{self.base_url}{path}"
+
+    async def send_message(self, message: dict) -> None:
         """
-            Отправляет сообщение в телеграм бота
-            Args:
-                message - сообщение
+        Отправляет сообщение в телеграм бота
+        Args:
+            message - сообщение
         """
         await self._request(
-            method="POST",
-            url=self.base_url,
-            payload=message
+            method="GET",
+            url=self._get_url("sendMessage"),
+            params=message
         )
