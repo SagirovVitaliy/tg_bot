@@ -88,7 +88,7 @@ def args_parser():
     parser.add_argument(
         "--amqp-url",
         help="URL для rabbitmq сервера, формат amqp://login:pass@server:port",
-        default="amqp://guest:guest@rabbitmq:5672"
+        default="amqp://guest:guest@rabbitmq/"
     )
     parser.add_argument(
         "--amqp-queue",

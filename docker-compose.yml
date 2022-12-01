@@ -8,8 +8,10 @@ services:
     ports:
       - '15672:15672'
 
-  service:
+  amqp:
     build: .
+
+    restart: always
 
     command: python amqp_service.py
 
@@ -18,6 +20,8 @@ services:
 
   bot:
     build: .
+
+    restart: always
 
     command: python bot.py
 
