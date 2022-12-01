@@ -1,0 +1,40 @@
+version: "3.9"
+services:
+  rabbitmq:
+    image: rabbitmq:3.8-management-alpine
+
+    container_name: 'rabbitmq'
+
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+
+    networks:
+      - tg_rabbit
+
+  service:
+    build: .
+
+    command: python amqp_service.py
+
+    depends_on:
+      - "rabbitmq"
+
+    networks:
+      - tg_rabbit
+
+  bot:
+    build: .
+
+    command: python bot.py
+
+    depends_on:
+      - "rabbitmq"
+
+    networks:
+      - tg_rabbit
+
+networks:
+  tg_rabbit:
+    external:
+      name: tg
