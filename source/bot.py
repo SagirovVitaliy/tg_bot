@@ -60,6 +60,9 @@ class Bot:
         except AMQPClientException as e:
             self.logger.error(f"Ошибка AMQP: {e}")
 
+    def lox():
+        print("lox")
+
 
 def args_parser():
     parser = argparse.ArgumentParser()
