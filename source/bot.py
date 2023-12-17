@@ -16,7 +16,8 @@ from telegram.ext import (
 from lib.amqp_client import ClientAMQP, AMQPClientException
 from lib.config_log import config_logger
 
-# местные приколы
+# местные
+
 
 
 class Bot:
